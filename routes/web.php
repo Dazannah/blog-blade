@@ -20,12 +20,18 @@ Route::get('/', function () {
     return view('welcome');
 })->middleware(['toHomeIfAuth'])->name('welcome');
 
-Route::get('/home', fn()=> view('homePage')
+Route::get('/home', function(){
+    return view('homePage', ['title' => 'Home']);
+}
 )->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('dashboard', ['title' => 'My posts']);
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/new-post', function(){
+    return view('new-post', ['title' => 'New post']);
+})->middleware(['auth', 'verified'])->name('new-post');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
