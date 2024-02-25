@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -21,17 +22,19 @@ Route::get('/', function () {
 })->middleware(['toHomeIfAuth'])->name('welcome');
 
 Route::get('/home', function(){
-    return view('homePage', ['title' => 'Home']);
+    return view('homePage', ['pageTitle' => 'Home']);
 }
 )->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/dashboard', function () {
-    return view('dashboard', ['title' => 'My posts']);
+    return view('dashboard', ['pageTitle' => 'My posts']);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/new-post', function(){
-    return view('new-post', ['title' => 'New post']);
-})->middleware(['auth', 'verified'])->name('new-post');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/new-post', [PostController::class, 'create'])->name('new-post');
+    Route::post('/new-post', [PostController::class, 'store'])->name('new-post');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
