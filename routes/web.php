@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,7 +18,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->middleware(['toHomeIfAuth'])->name('welcome');
+
+Route::get('/home', fn()=> view('homePage')
+)->middleware(['auth', 'verified'])->name('home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
