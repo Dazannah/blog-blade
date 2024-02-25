@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -14,7 +14,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+
+        return view('dashboard', ['pageTitle' => 'My posts', 'posts' => $posts]);
     }
 
     /**
@@ -45,7 +47,7 @@ class PostController extends Controller
             'updated_at' => null
         ]);
 
-        return redirect('/new-post')->with('success', true);//Route::get('/new-post', [PostController::class, 'create'])->name('new-post');
+        return redirect('/new-post')->with('success', true);
     }
 
     /**

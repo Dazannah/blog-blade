@@ -26,9 +26,7 @@ Route::get('/home', function(){
 }
 )->middleware(['auth', 'verified'])->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard', ['pageTitle' => 'My posts']);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [PostController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
