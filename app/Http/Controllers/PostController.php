@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use Hamcrest\Type\IsInteger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -12,11 +13,31 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        $postsOnPage = 10;
+        if(!is_numeric($request['page'])){
+            return redirect("/dashboard?page=1");
+        }
 
-        return view('dashboard', ['pageTitle' => 'My posts', 'posts' => $posts]);
+        if($request['page'] <= 0){
+            return redirect("/dashboard?page=1");
+        }
+
+        if(!ctype_digit($request['page'])){
+            $pageToRedirect = floor($request['page']);
+            return redirect("/dashboard?page=$pageToRedirect");
+        }
+
+        $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate($postsOnPage);
+        $total = $posts->total();
+        $maxPage = ceil($total/$postsOnPage);
+
+        if($request['page'] > $maxPage && $total > 0){
+            return redirect("/dashboard?page=$maxPage");
+        }
+
+        return view('dashboard', ['pageTitle' => 'My posts', 'posts' => $posts, 'maxPage' => $maxPage]);
     }
 
     /**
@@ -81,4 +102,11 @@ class PostController extends Controller
     {
         //
     }
+
+    public function show10()
+    {
+        $posts = DB::table('posts')->orderBy('created_at', 'desc')->take(10)->get();
+        return view('welcome', ['posts' => $posts]);
+    }
+    
 }

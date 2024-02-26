@@ -14,6 +14,7 @@
             </button>
         </a>
     </div>
-
-    @include('layouts.posts')
+    
+    @include('components.posts')
+    @include('components.pagination')
 </x-app-layout>
