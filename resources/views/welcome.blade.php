@@ -24,6 +24,7 @@
                 Last 10 new blog posts:
             </div>
 
+            @include('components.posts')
         </div>
     </body>
 </html>

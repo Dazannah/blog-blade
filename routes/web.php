@@ -17,9 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->middleware(['toHomeIfAuth'])->name('welcome');
+Route::get('/', [PostController::class, 'show10'])->name('welcome')->middleware(['toHomeIfAuth']);
 
 Route::get('/home', function(){
     return view('homePage', ['pageTitle' => 'Home']);
