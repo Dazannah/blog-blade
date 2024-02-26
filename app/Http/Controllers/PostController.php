@@ -105,7 +105,8 @@ class PostController extends Controller
 
     public function show10()
     {
-        $posts = DB::table('posts')->orderBy('created_at', 'desc')->take(10)->get();
+        $posts = DB::table('posts')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->orderBy('created_at', 'desc')->take(10)->get();
+
         return view('welcome', ['posts' => $posts]);
     }
     
