@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
-use Hamcrest\Type\IsInteger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -16,15 +15,16 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $postsOnPage = 10;
-        if(!is_numeric($request['page'])){
+
+        if(isset($request['page']) && !is_numeric($request['page'])){
             return redirect("/dashboard?page=1");
         }
 
-        if($request['page'] <= 0){
+        if(isset($request['page']) && $request['page'] <= 0){
             return redirect("/dashboard?page=1");
         }
 
-        if(!ctype_digit($request['page'])){
+        if(isset($request['page']) && !ctype_digit($request['page'])){
             $pageToRedirect = floor($request['page']);
             return redirect("/dashboard?page=$pageToRedirect");
         }
@@ -100,7 +100,9 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        DB::table('posts')->where('user_id', '=', Auth::user()->id)->delete($id);
+
+        return redirect(url()->full())->with('deleted', true);
     }
 
     public function show10()
