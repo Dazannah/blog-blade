@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>{{ $title ?? __('My blog') }}</x-slot>
+    <x-slot:pageTitle>{{ $pageTitle ?? __('My blog') }}</x-slot>
     
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
