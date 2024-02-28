@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -14,30 +15,35 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        $postsOnPage = 10;
-
-        if(isset($request['page']) && !is_numeric($request['page'])){
-            return redirect("/dashboard?page=1");
+        try{
+            $postsOnPage = 10;
+    
+            if(isset($request['page']) && !is_numeric($request['page'])){
+                return redirect("/dashboard?page=1");
+            }
+    
+            if(isset($request['page']) && $request['page'] <= 0){
+                return redirect("/dashboard?page=1");
+            }
+    
+            if(isset($request['page']) && !ctype_digit($request['page'])){
+                $pageToRedirect = floor($request['page']);
+                return redirect("/dashboard?page=$pageToRedirect");
+            }
+    
+            $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate($postsOnPage);
+            $total = $posts->total();
+            $maxPage = ceil($total/$postsOnPage);
+    
+            if($request['page'] > $maxPage && $total > 0){
+                return redirect("/dashboard?page=$maxPage");
+            }
+    
+            return view('dashboard', ['pageTitle' => 'My posts', 'posts' => $posts, 'maxPage' => $maxPage]);
+        }catch(\Exception $err){
+            return abort(500, 'Internal error.');
         }
 
-        if(isset($request['page']) && $request['page'] <= 0){
-            return redirect("/dashboard?page=1");
-        }
-
-        if(isset($request['page']) && !ctype_digit($request['page'])){
-            $pageToRedirect = floor($request['page']);
-            return redirect("/dashboard?page=$pageToRedirect");
-        }
-
-        $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate($postsOnPage);
-        $total = $posts->total();
-        $maxPage = ceil($total/$postsOnPage);
-
-        if($request['page'] > $maxPage && $total > 0){
-            return redirect("/dashboard?page=$maxPage");
-        }
-
-        return view('dashboard', ['pageTitle' => 'My posts', 'posts' => $posts, 'maxPage' => $maxPage]);
     }
 
     /**
@@ -58,17 +64,22 @@ class PostController extends Controller
             'post-body' => ['required', 'min:10'],
         ]);
 
-        $title = $request['title'];
-        $postBody = $request['post-body'];
+        try{
+            $title = $request['title'];
+            $postBody = $request['post-body'];
+    
+            $response = Post::create([
+                'title' => $title,
+                'post_body' => $postBody,
+                'user_id' => Auth::id(),
+                'updated_at' => null
+            ]);
 
-        Post::create([
-            'title' => $title,
-            'post_body' => $postBody,
-            'user_id' => Auth::id(),
-            'updated_at' => null
-        ]);
+            return redirect("/post/$response->post_id")->with('created', true);
+        }catch(\Exception $err){
+            return abort(500, 'Internal error.');
+        }
 
-        return redirect('/new-post')->with('success', true);
     }
 
     /**
@@ -76,9 +87,19 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $post = DB::table('posts')->where('id', $id)->get();
+        try{
+            $post = DB::table('posts')->where('id', $id)->get();
 
-        return view('singlePost', ['pageTitle' => $post[0]->title, 'posts' => $post]);
+            if($post->count() == 1){
+                return view('singlePost', ['pageTitle' => $post[0]->title, 'posts' => $post]);
+            }else if($post){
+                return redirect('/dashboard')->with('error', 'Post not found.');;
+            }
+
+        }catch(\Exception $err){
+            //Log::error('Error updating post: ' . $err->getMessage());
+            return abort(500, 'Internal error.');
+        }
     }
 
     /**
@@ -86,13 +107,19 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        $post = DB::table('posts')->where('id', $id)->first();
+        try{
+            $post = DB::table('posts')->where('user_id', '=', Auth::user()->id)->where('id', $id)->first();
 
-        /*if(Auth::user()->id != $post->user_id){
-            return abort(403, 'Unauthorized action.');
-        }*/
+            if($post){
+                return view("edit-post", ['pageTitle' => 'Edit post', 'post' => $post]);
+            }else{
+                return redirect('/dashboard')->with('error', 'Post not found or you do not have permission to update it.');;
+            }
 
-        return view("edit-post", ['pageTitle' => 'Edit post', 'post' => $post]);
+        }catch(\Exception $err){
+            //Log::error('Error updating post: ' . $err->getMessage());
+            return abort(500, 'Internal error.');
+        }
     }
 
     /**
@@ -100,12 +127,12 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            'title' => ['required', 'max:50', 'min:3'],
+            'post-body' => ['required', 'min:10'],
+        ]);
 
         try{
-            $request->validate([
-                'title' => ['required', 'max:50', 'min:3'],
-                'post-body' => ['required', 'min:10'],
-            ]);
 
             $result = DB::table('posts')->where('user_id', '=', Auth::user()->id)->where('id', $id)->update(['title' => $request['title'], 'post_body' => $request['post-body'], 'updated_at' => now()->toDateTimeString()]);
 
@@ -127,16 +154,31 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        DB::table('posts')->where('user_id', '=', Auth::user()->id)->delete($id);
 
-        return redirect(url()->full())->with('deleted', true);
+        try{
+            $result = DB::table('posts')->where('user_id', '=', Auth::user()->id)->delete($id);
+
+            if($result){
+                return redirect('/dashboard')->with('deleted', true);
+            }else{
+                return redirect('/dashboard')->with('deleted', false)->with('error', 'Post not found or you do not have permission to delete it.');;
+            }
+
+        }catch(\Exception $err){
+            //Log::error('Error updating post: ' . $err->getMessage());
+            return abort(500, 'Internal error.');
+        }
     }
 
     public function show10()
     {
-        $posts = DB::table('posts')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->orderBy('created_at', 'desc')->take(10)->get();
+        try{
+            $posts = DB::table('posts')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->orderBy('created_at', 'desc')->take(10)->get();
 
-        return view('welcome', ['posts' => $posts]);
+            return view('welcome', ['posts' => $posts]);
+        }catch(\Exception $err){
+            return abort(500, 'Internal error.');
+        }
     }
     
 }
