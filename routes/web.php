@@ -31,6 +31,8 @@ Route::get('/post/{id}', [PostController::class, 'show'])->name('singlePost');
 Route::get('/post/{id}/edit', [PostController::class, 'edit'])->middleware(['auth', 'verified'])->name('getEdit');
 Route::post('/post/{id}/edit', [PostController::class, 'update'])->middleware(['auth', 'verified'])->name('saveEdit');
 
+Route::get('/post/{id}/delete', [PostController::class, 'destroy'])->middleware(['auth', 'verified'])->name('saveEdit');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/new-post', [PostController::class, 'create'])->name('new-post');
     Route::post('/new-post', [PostController::class, 'store'])->name('new-post');
