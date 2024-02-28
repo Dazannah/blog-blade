@@ -19,6 +19,12 @@
         <strong class="font-bold">{{session('error')}}</strong>
       </div>
     </div>
+  @elseif (session('created'))
+    <div class="py-3">
+      <div class="max-w-fit mx-auto bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded" role="alert">
+        <strong class="font-bold">Post successfully creted.</strong>
+      </div>
+    </div>
   @endif
 
   @include('components.posts')
