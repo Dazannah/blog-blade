@@ -47,7 +47,7 @@
     @else
     <div class="bg-white my-3 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 text-gray-900 dark:text-gray-100">
-            You dont have any post yet.
+            You don't have any post yet.
         </div>
     </div>
     @endif
