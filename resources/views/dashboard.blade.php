@@ -17,10 +17,14 @@
     
     @if(session('deleted'))
     <div class="py-3">
-      <div class="max-w-fit mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-        <strong class="font-bold">Post successfully deleted.</strong>
+      <div class="max-w-fit mx-auto bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded" role="alert">
+        <strong class="font-bold">Post successfully <span class="text-red-500">deleted</span>.</strong>
       </div>
     </div>
+    @endif
+
+    @if(session('error'))
+        @include('components.error')
     @endif
     
     @include('components.posts')
