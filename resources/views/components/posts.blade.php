@@ -16,7 +16,7 @@
                             <br><span>Edited: {{$post->updated_at}}</span>
                         @endif
                     </div>
-                    @if($post->user_id == Auth::user()->id)
+                    @if(isset(Auth::user()->id) && $post->user_id == Auth::user()->id)
                         <div>
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
@@ -30,11 +30,11 @@
                                 </x-slot>
 
                                 <x-slot name="content">
-                                    <x-dropdown-link :href="route('profile.edit')">
+                                    <x-dropdown-link href="/post/{{$post->id}}/edit">
                                         <span class="text-orange-500 dark:text-orange-500">Edit</span>
                                     </x-dropdown-link>
 
-                                    <x-dropdown-link :href="route('logout')">
+                                    <x-dropdown-link href="/post/{{$post->id}}/delete">
                                     <span class="text-red-500 dark:text-red-500">Delete</span>
                                     </x-dropdown-link>
                                 </x-slot>
