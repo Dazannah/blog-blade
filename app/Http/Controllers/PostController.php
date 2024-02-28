@@ -76,7 +76,9 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $post = DB::table('posts')->where('id', $id)->get();
+
+        return view('singlePost', ['pageTitle' => $post[0]->title, 'posts' => $post]);
     }
 
     /**
@@ -84,7 +86,13 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $post = DB::table('posts')->where('id', $id)->first();
+
+        /*if(Auth::user()->id != $post->user_id){
+            return abort(403, 'Unauthorized action.');
+        }*/
+
+        return view("edit-post", ['pageTitle' => 'Edit post', 'post' => $post]);
     }
 
     /**
@@ -92,7 +100,26 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        try{
+            $request->validate([
+                'title' => ['required', 'max:50', 'min:3'],
+                'post-body' => ['required', 'min:10'],
+            ]);
+
+            $result = DB::table('posts')->where('user_id', '=', Auth::user()->id)->where('id', $id)->update(['title' => $request['title'], 'post_body' => $request['post-body'], 'updated_at' => now()->toDateTimeString()]);
+
+            if($result){
+                return redirect("/post/$id")->with('updated', true);
+            }else{
+                return redirect("/post/$id")->with('updated', false)->with('error', 'Post not found or you do not have permission to update it.');
+            }
+
+        }catch(\Exception $err){
+            //Log::error('Error updating post: ' . $err->getMessage());
+            return abort(500, 'Internal error.');
+        }
+
     }
 
     /**

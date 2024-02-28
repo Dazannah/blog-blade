@@ -26,6 +26,10 @@ Route::get('/home', function(){
 
 Route::get('/dashboard', [PostController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/post/{id}', [PostController::class, 'show'])->name('singlePost');
+
+Route::get('/post/{id}/edit', [PostController::class, 'edit'])->middleware(['auth', 'verified'])->name('getEdit');
+Route::post('/post/{id}/edit', [PostController::class, 'update'])->middleware(['auth', 'verified'])->name('saveEdit');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/new-post', [PostController::class, 'create'])->name('new-post');
