@@ -4,7 +4,7 @@
         <x-nav-link :href="route('welcome')" :active="request()->routeIs('welcome')">
           {{ __('Main page') }}
         </x-nav-link>
-        <x-nav-link :href="route('allpost')" :active="request()->routeIs('allpost')">
+        <x-nav-link :href="route('allposts')" :active="request()->routeIs('allposts')">
           {{ __('All posts') }}
         </x-nav-link>
       </div>

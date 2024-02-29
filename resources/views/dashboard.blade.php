@@ -26,7 +26,7 @@
     @if(session('error'))
         @include('components.error')
     @endif
-    
+
     @include('components.posts')
     @include('components.pagination')
 </x-app-layout>
