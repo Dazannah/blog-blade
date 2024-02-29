@@ -19,12 +19,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PostController::class, 'show10'])->name('welcome')->middleware(['toHomeIfAuth']);
 
+Route::get('/all-post', [PostController::class, 'index'])->name('allpost');
+
 Route::get('/home', function(){
     return view('homePage', ['pageTitle' => 'Home']);
 }
 )->middleware(['auth', 'verified'])->name('home');
 
-Route::get('/dashboard', [PostController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [PostController::class, 'ownPosts'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/post/{id}', [PostController::class, 'show'])->name('singlePost');
 
