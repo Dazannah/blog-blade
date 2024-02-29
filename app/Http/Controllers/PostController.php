@@ -31,7 +31,7 @@ class PostController extends Controller
                 return redirect("/all-posts?page=$pageToRedirect");
             }
     
-            $posts = DB::table('posts')->orderBy('created_at', 'desc')->paginate($postsOnPage);
+            $posts = DB::table('posts')->orderBy('created_at', 'desc')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->paginate($postsOnPage);
             $total = $posts->total();
             $maxPage = ceil($total/$postsOnPage);
     
@@ -46,7 +46,7 @@ class PostController extends Controller
     }
 
     public function indexFiltered(Request $request){
-        //try{
+        try{
             $postsOnPage = 10;
     
             if(isset($request['page']) && !is_numeric($request['page'])){
@@ -63,17 +63,16 @@ class PostController extends Controller
             }
     
             $posts = DB::table('posts')
-            ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
-            ->orderBy('created_at', 'desc')
+            ->when(isset($request['date']) && $request['date'] != "", function ($querry) use ($request){
+                return $querry->whereDate('posts.created_at', '=', date_create($request['date'])->format('Y-m-d'));
+            })
             ->where([
-                ['users.name', 'REGEXP', $request['author']],
                 ['title', 'REGEXP', $request['post-title']],
                 ['post_body', 'REGEXP', $request['post-body']],
                 ])
-            ->when(isset($request['date']) && $request['date'] != "", function ($querry) use ($request){
-                $date =  date_create($request['date'])->format('Y-m-d');
-                return $querry->whereDate('created_at', '=', $date);
-            })
+            ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
+            ->where('users.name', 'REGEXP', $request['author'])
+            ->orderBy('created_at', 'desc')
             ->paginate($postsOnPage);
 
             $total = $posts->total();
@@ -84,9 +83,9 @@ class PostController extends Controller
             }
     
             return view('all-posts', ['pageTitle' => 'All posts', 'posts' => $posts, 'maxPage' => $maxPage]);
-        /*}catch(\Exception $err){
+        }catch(\Exception $err){
             return abort(500, 'Internal error.');
-        }*/
+        }
     }
 
     public function ownPosts(Request $request)
