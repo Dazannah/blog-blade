@@ -5,7 +5,7 @@
           {{ __('Main page') }}
         </x-nav-link>
         <x-nav-link :href="route('allpost')" :active="request()->routeIs('allpost')">
-          {{ __('All post') }}
+          {{ __('All posts') }}
         </x-nav-link>
       </div>
       <!--<div class="sm:fixed sm:top-0 sm:left-0 p-6 text-right z-10">

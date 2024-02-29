@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PostController::class, 'show10'])->name('welcome')->middleware(['toHomeIfAuth']);
 
-Route::get('/all-post', [PostController::class, 'index'])->name('allpost');
+Route::get('/all-posts', [PostController::class, 'index'])->name('allpost');
 
 Route::get('/home', function(){
     return view('homePage', ['pageTitle' => 'Home']);

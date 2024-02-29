@@ -13,7 +13,7 @@
                         {{ __('My posts') }}
                     </x-nav-link>
                     <x-nav-link :href="route('allpost')" :active="request()->routeIs('allpost')">
-                        {{ __('All post') }}
+                        {{ __('All posts') }}
                     </x-nav-link>
                 </div>
             </div>
