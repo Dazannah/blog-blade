@@ -12,6 +12,9 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('My posts') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('allpost')" :active="request()->routeIs('allpost')">
+                        {{ __('All post') }}
+                    </x-nav-link>
                 </div>
             </div>
 
