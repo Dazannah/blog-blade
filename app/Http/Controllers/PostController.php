@@ -15,6 +15,13 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
+        $posts =[];
+        $maxPage = 10;
+        return view('all-posts', ['pageTitle' => 'All post', 'posts' => $posts, 'maxPage' => $maxPage]);
+    }
+
+    public function ownPosts(Request $request)
+    {
         try{
             $postsOnPage = 10;
     
@@ -175,7 +182,7 @@ class PostController extends Controller
         try{
             $posts = DB::table('posts')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->orderBy('created_at', 'desc')->take(10)->get();
 
-            return view('welcome', ['posts' => $posts]);
+            return view('welcome', ['pageTitle' => 'Welcome', 'posts' => $posts]);
         }catch(\Exception $err){
             return abort(500, 'Internal error.');
         }
