@@ -1,6 +1,7 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-3">
   <div class="font-semibold text-xl leading-tight">
-    <form action="/all-posts" method="post">
+    <form method="POST" action="/all-posts">
+      @csrf
       <input class="rounded" type="text" name="author" id="author" placeholder="Author">
       <input class="rounded" type="text" name="post-title" id="post-title-search" placeholder="Post title">
       <input class="rounded" type="text" name="post-body" id="post-body-search" placeholder="Post body">

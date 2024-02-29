@@ -45,6 +45,50 @@ class PostController extends Controller
         }
     }
 
+    public function indexFiltered(Request $request){
+        //try{
+            $postsOnPage = 10;
+    
+            if(isset($request['page']) && !is_numeric($request['page'])){
+                return redirect("/all-posts?page=1");
+            }
+    
+            if(isset($request['page']) && $request['page'] <= 0){
+                return redirect("/all-posts?page=1");
+            }
+    
+            if(isset($request['page']) && !ctype_digit($request['page'])){
+                $pageToRedirect = floor($request['page']);
+                return redirect("/all-posts?page=$pageToRedirect");
+            }
+    
+            $posts = DB::table('posts')
+            ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
+            ->orderBy('created_at', 'desc')
+            ->where([
+                ['users.name', 'REGEXP', $request['author']],
+                ['title', 'REGEXP', $request['post-title']],
+                ['post_body', 'REGEXP', $request['post-body']],
+                ])
+            ->when(isset($request['date']) && $request['date'] != "", function ($querry) use ($request){
+                $date =  date_create($request['date'])->format('Y-m-d');
+                return $querry->whereDate('created_at', '=', $date);
+            })
+            ->paginate($postsOnPage);
+
+            $total = $posts->total();
+            $maxPage = ceil($total/$postsOnPage);
+    
+            if($request['page'] > $maxPage && $total > 0){
+                return redirect("/all-posts?page=$maxPage");
+            }
+    
+            return view('all-posts', ['pageTitle' => 'All posts', 'posts' => $posts, 'maxPage' => $maxPage]);
+        /*}catch(\Exception $err){
+            return abort(500, 'Internal error.');
+        }*/
+    }
+
     public function ownPosts(Request $request)
     {
         try{
