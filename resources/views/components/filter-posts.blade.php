@@ -1,7 +1,6 @@
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-3">
   <div class="font-semibold text-xl leading-tight">
-    <form method="POST" action="/all-posts">
-      @csrf
+    <form method="GET" action="/all-posts">
       <input class="rounded" type="text" name="author" id="author" placeholder="Author" value="{{ Request::get('author') ?? '' }}">
       <input class="rounded" type="text" name="post-title" id="post-title-search" placeholder="Post title" value="{{ Request::get('post-title') ?? '' }}">
       <input class="rounded" type="text" name="post-body" id="post-body-search" placeholder="Post body" value="{{ Request::get('post-body') ?? '' }}">
