@@ -41,7 +41,7 @@ class ProfileController extends Controller
                 ['post_body', 'REGEXP', $request['post-body']],
                 ])
             ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
-            ->where('users.name', 'REGEXP', $request['author'])
+            ->where('users.name', 'REGEXP', $username) // postcontroller difi
             ->orderBy('created_at', 'desc')
             ->paginate($postsOnPage);
 
