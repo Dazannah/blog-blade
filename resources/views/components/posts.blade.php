@@ -7,7 +7,7 @@
                         <h1>{{$post->title}}</h1><br>
                         <span>{{$post->post_body}}</span><br><br>
                         @if(isset($post->name))
-                            <span>{{$post->name ?? ""}}</span><br>
+                            <a href="/user/{{$post->name}}" class="hover:text-gray-700 dark:hover:text-gray-300">{{$post->name ?? ""}}</a><br>
                         @endif
 
                         <span>{{$post->created_at}}</span>
