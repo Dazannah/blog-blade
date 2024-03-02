@@ -6,8 +6,8 @@
                     <div class="text-gray-900 dark:text-gray-100">
                         <h1>{{$post->title}}</h1><br>
                         <span>{{$post->post_body}}</span><br><br>
-                        @if(isset($post->name))
-                            <a href="/user/{{$post->name}}" class="hover:text-gray-700 dark:hover:text-gray-300">{{$post->name ?? ""}}</a><br>
+                        @if(isset($post->user->name))
+                            <a href="/user/{{$post->user->name}}" class="hover:text-gray-700 dark:hover:text-gray-300">{{$post->user->name ?? ""}}</a><br>
                         @endif
 
                         <span>{{$post->created_at}}</span>
