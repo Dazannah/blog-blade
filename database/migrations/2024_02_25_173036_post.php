@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('title');
             $table->longText('post_body');
             $table->timestamp('created_at')->useCurrent();
