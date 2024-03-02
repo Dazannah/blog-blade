@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\DB;
+use App\Models\Post;
 
 class ProfileController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(string $username, Request $request){ // todo: megnézni hogy postcontroller index methoddal és ezzel lehet e valamit közösen kezdeni
+    public function index(string $username, Request $request): View | RedirectResponse{ // todo: megnézni hogy postcontroller index methoddal és ezzel lehet e valamit közösen kezdeni
         try{
             $postsOnPage = 10;
 
@@ -31,8 +31,11 @@ class ProfileController extends Controller
                 $pageToRedirect = floor($request['page']);
                 return redirect("/user/$username?page=$pageToRedirect");
             }
-    
-            $posts = DB::table('posts')
+
+            $posts = Post::with('user')
+            ->whereHas('user', function ($query) use ($username){
+                $query->where('name', 'REGEXP',  $username);
+            })
             ->when(isset($request['date']) && $request['date'] != "", function ($querry) use ($request){
                 return $querry->whereDate('posts.created_at', '=', date_create($request['date'])->format('Y-m-d'));
             })
@@ -40,9 +43,7 @@ class ProfileController extends Controller
                 ['title', 'REGEXP', $request['post-title']],
                 ['post_body', 'REGEXP', $request['post-body']],
                 ])
-            ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
-            ->where('users.name', 'REGEXP', $username) // postcontroller difi
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->paginate($postsOnPage);
 
             $total = $posts->total();
