@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +14,7 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request){
+    public function index(Request $request): View | RedirectResponse{
         try{
             $postsOnPage = 10;
     
@@ -28,8 +30,11 @@ class PostController extends Controller
                 $pageToRedirect = floor($request['page']);
                 return redirect("/all-posts?page=$pageToRedirect");
             }
-    
-            $posts = DB::table('posts')
+
+            $posts = Post::with('user')
+            ->whereHas('user', function ($query) use ($request){
+                $query->where('name', 'REGEXP',  $request['author']);
+            })
             ->when(isset($request['date']) && $request['date'] != "", function ($querry) use ($request){
                 return $querry->whereDate('posts.created_at', '=', date_create($request['date'])->format('Y-m-d'));
             })
@@ -37,9 +42,7 @@ class PostController extends Controller
                 ['title', 'REGEXP', $request['post-title']],
                 ['post_body', 'REGEXP', $request['post-body']],
                 ])
-            ->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')
-            ->where('users.name', 'REGEXP', $request['author'])
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->paginate($postsOnPage);
 
             $total = $posts->total();
@@ -55,7 +58,7 @@ class PostController extends Controller
         }
     }
 
-    public function ownPosts(Request $request)
+    public function ownPosts(Request $request): View | RedirectResponse
     {
         try{
             $postsOnPage = 10;
@@ -73,7 +76,7 @@ class PostController extends Controller
                 return redirect("/dashboard?page=$pageToRedirect");
             }
     
-            $posts = DB::table('posts')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate($postsOnPage);
+            $posts = Post::with('user')->where('user_id', Auth::id())->latest()->paginate($postsOnPage);
             $total = $posts->total();
             $maxPage = ceil($total/$postsOnPage);
     
@@ -91,7 +94,7 @@ class PostController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): View
     {
         return view('new-post', ['pageTitle' => 'New post']);
     }
@@ -99,7 +102,7 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'title' => ['required', 'max:50', 'min:3'],
@@ -127,10 +130,10 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): View | RedirectResponse
     {
         try{
-            $post = DB::table('posts')->where('id', $id)->get();
+            $post = Post::with('user')->where('id', $id)->get();
 
             if($post->count() == 1){
                 return view('singlePost', ['pageTitle' => $post[0]->title, 'posts' => $post]);
@@ -147,10 +150,10 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id): View | RedirectResponse
     {
         try{
-            $post = DB::table('posts')->where('user_id', '=', Auth::user()->id)->where('id', $id)->first();
+            $post = Post::with('user')->where('user_id', '=', Auth::user()->id)->where('id', $id)->first();
 
             if($post){
                 return view("edit-post", ['pageTitle' => 'Edit post', 'post' => $post]);
@@ -167,7 +170,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
         $request->validate([
             'title' => ['required', 'max:50', 'min:3'],
@@ -175,8 +178,7 @@ class PostController extends Controller
         ]);
 
         try{
-
-            $result = DB::table('posts')->where('user_id', '=', Auth::user()->id)->where('id', $id)->update(['title' => $request['title'], 'post_body' => $request['post-body'], 'updated_at' => now()->toDateTimeString()]);
+            $result = Post::with('user')->where('user_id', '=', Auth::user()->id)->where('id', $id)->update(['title' => $request['title'], 'post_body' => $request['post-body'], 'updated_at' => now()->toDateTimeString()]);
 
             if($result){
                 return redirect("/post/$id")->with('updated', true);
@@ -194,11 +196,11 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
 
         try{
-            $result = DB::table('posts')->where('user_id', '=', Auth::user()->id)->delete($id);
+            $result = Post::with('user')->where('user_id', '=', Auth::user()->id)->where('id', $id)->delete();
 
             if($result){
                 return redirect('/dashboard')->with('deleted', true);
@@ -212,10 +214,10 @@ class PostController extends Controller
         }
     }
 
-    public function show10()
+    public function show10(): View
     {
         try{
-            $posts = DB::table('posts')->join('users', 'posts.user_id', '=', 'users.id')->select('posts.*', 'users.name')->orderBy('created_at', 'desc')->take(10)->get();
+            $posts = Post::with('user')->latest()->take(10)->get();
 
             return view('welcome', ['pageTitle' => 'Welcome', 'posts' => $posts]);
         }catch(\Exception $err){
