@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Controllers\PostController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,13 +17,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [PostController::class, 'show10'])->name('welcome')->middleware(['toHomeIfAuth']);
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/all-posts', [PostController::class, 'index'])->name('allposts');
+Route::get('/user/{username}', [ProfileController::class, 'index']);
+
+Route::get('/home', function(){
+    return view('homePage', ['pageTitle' => 'Home']);
+}
+)->middleware(['auth', 'verified'])->name('home');
+
+Route::get('/dashboard', [PostController::class, 'ownPosts'])->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/post/{id}', [PostController::class, 'show'])->name('singlePost');
+
+Route::get('/post/{id}/edit', [PostController::class, 'edit'])->middleware(['auth', 'verified'])->name('getEdit');
+Route::post('/post/{id}/edit', [PostController::class, 'update'])->middleware(['auth', 'verified'])->name('saveEdit');
+
+Route::get('/post/{id}/delete', [PostController::class, 'destroy'])->middleware(['auth', 'verified'])->name('saveEdit');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/new-post', [PostController::class, 'create'])->name('new-post');
+    Route::post('/new-post', [PostController::class, 'store'])->name('new-post');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
