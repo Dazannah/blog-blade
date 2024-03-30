@@ -16,8 +16,8 @@ class Post extends Model
      * @var string
      */
 
-    protected $table = 'posts';
-    protected $primaryKey = 'post_id';
+    protected $table = 'posts'; //ez a default is
+    //protected $primaryKey = 'post_id';
 
     protected $fillable = [
         'title',

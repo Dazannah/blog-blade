@@ -10,11 +10,21 @@
                             <a href="/user/{{$post->user->name}}" class="hover:text-gray-700 dark:hover:text-gray-300">{{$post->user->name ?? ""}}</a><br>
                         @endif
 
-                        <span>{{$post->created_at}}</span>
+                        <span>{{$post->created_at}}</span><br>
 
                         @if($post->updated_at != null)
-                            <br><span>Edited: {{$post->updated_at}}</span>
+                            <span>Edited: {{$post->updated_at}}</span><br>
                         @endif
+
+                        @if(auth()->check()) <a href=""> @endif
+                            <i class="fa fa-thumbs-up"></i>
+                        @if(auth()->check()) </a> @endif
+                        {{$post->likes}}
+
+                        @if(auth()->check()) <a href=""> @endif
+                            <i class="fa fa-thumbs-down"></i>
+                        @if(auth()->check()) </a> @endif 
+                        {{$post->dislikes}}
                     </div>
                     @if(isset(Auth::user()->id) && $post->user_id == Auth::user()->id)
                         <div>

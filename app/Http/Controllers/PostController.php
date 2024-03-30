@@ -120,7 +120,7 @@ class PostController extends Controller
                 'updated_at' => null
             ]);
 
-            return redirect("/post/$response->post_id")->with('created', true);
+            return redirect("/post/$response->id")->with('created', true);
         }catch(\Exception $err){
             return abort(500, 'Internal error.');
         }
